@@ -4,7 +4,7 @@ import kalaha.gamex as Game
 row_separator = "  " + "--" * Game.N_COLS
 
 
-def draw_grid(game: Kalaha):
+def draw(game: Kalaha):
 
     top = "    "
     for cupt in reversed(game.sides[Player.TOP]):

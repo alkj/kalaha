@@ -162,6 +162,15 @@ class Kalaha(object):
             return (Player.BOTTOM, add_scoret)
         return (Player.BLANK, 0)
 
+    def before_move(self, choice: int):
+        # check that the input choice is valid, can move that cell
+        if (choice < 0 or choice > 5):
+            return (False)
+        elif (self.sides[self.turn][choice].get_marbles() <= 0):
+            return (False)
+        else:
+            return (True)
+
     def after_move(self, last):
         # check if any side has all empty
         # if so declare the winner
@@ -200,6 +209,7 @@ class Kalaha(object):
         # if the last cup was the store then goes again
         if (last[0] == "store"):
             self.turn = self.turn.opponent()
+            print("Last marble landed in your store. Go again!")
 
     def move_marbles(self, cup_id: int):
         # moves the marbles from cup_id and returns the last cup a marble is dropped
@@ -213,19 +223,6 @@ class Kalaha(object):
         num_marbles = start_cup.get_marbles()
         self.sides[self.turn][cup_id] = Cup(self.turn, cup_id, 0)
 
-        # if (self.turn == Player.BOTTOM):
-        #     opp_count = 0
-        #     for i in range(start_cup, start_cup+num_marbles):
-        #         if (i < N_COLS):
-        #             self.sides[Player.BOTTOM][i] = Cup(
-        #                 Player.BOTTOM, i, self.sides[Player.BOTTOM][i].get_marbles()+1)
-        #         elif (i > N_COLS):  # else it goes into top players side
-        #             self.sides[Player.TOP][i] = Cup(
-        #                 Player.TOP, opp_count, self.sides[Player.TOP][opp_count].get_marbles()+1)
-        #             opp_count += 1
-        #         else:  # else the cup col number is equal to the store
-        #             self.stores[Player.BOTTOM] = Store(
-        #                 Player.BOTTOM, self.stores[Player.BOTTOM]+1)
 
 # more general turn
         opp = self.turn.opponent()

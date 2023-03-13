@@ -1,6 +1,6 @@
 from kalaha.gamex import Player, Player, Kalaha
 from typing import List
-import kalaha.view as View
+import kalaha.board as Board
 
 
 class HumanAgent():
@@ -13,7 +13,7 @@ class HumanAgent():
         self.player = player
 
     def choose(self):
-        View.draw_grid(self.game)
+        Board.draw(self.game)
         print(f"What cup would you like to choose?")
 
     def __str__(self):

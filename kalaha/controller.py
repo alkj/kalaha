@@ -1,6 +1,6 @@
 from kalaha.gamex import Kalaha, Player
 from kalaha.human import HumanAgent
-import kalaha.view as View
+import kalaha.board as Board
 
 
 class Controller:
@@ -21,16 +21,19 @@ class Controller:
         prev_turn = Player.BLANK
         prev_actions_list = []
 
-        View.draw_grid(self.game)
+        Board.draw(self.game)
 
         curr = self.game.turn
         while self.game.winner == Player.BLANK:
 
             print("What cup would you like to pick up?")
             choice = int(input("> "))
-            last = self.game.move_marbles(choice)
-            View.draw_grid(self.game)
-            self.game.after_move(last)
+            if (self.game.before_move(choice)):
+                last = self.game.move_marbles(choice)
+                Board.draw(self.game)
+                self.game.after_move(last)
+            else:
+                print("That is not a valid choice, try again.")
 
         print(f"Player {self.game.winner.name} Won!")
 
