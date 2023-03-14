@@ -35,7 +35,7 @@ class Controller:
                     print(f"Player {self.game.turn.name} steals")
                     print(self.game.__str__())
                 self.game.after_move(last)
-                print(f"Score: Top - {self.game.get_score()[0]},Bottom - {self.game.get_score()[1]}")
+                print(f"Score: Top - {self.game.stores()[0]},Bottom - {self.game.stores()[1]}")
 
             else:
                 print("That is not a valid choice, try again.")

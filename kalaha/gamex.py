@@ -81,7 +81,6 @@ class Kalaha:
         }
         # self.score = {Player.TOP: self.stores[Player.TOP].score,
         #               Player.BOTTOM: self.stores[Player.BOTTOM].score}
-        self.score = {Player.TOP: 0, Player.BOTTOM: 0}
         # self.actions = self.possible_actionas()
         self.winner = Player.BLANK
 
@@ -93,9 +92,6 @@ class Kalaha:
 
     def check_game(self):
         return self.winner != Player.BLANK
-
-    def get_score(self):
-        return (self.score[Player.TOP], self.score[Player.BOTTOM])
 
     def empty_side(self):
         zerot = True
@@ -220,7 +216,6 @@ class Kalaha:
                 if (curr == self.cols):  # necessary if?
                     self.stores[self.turn] = Store(
                         self.turn, self.stores[self.turn].score + 1)
-                    self.score[self.turn] = self.stores[self.turn].score
                     last_cup = ("store", 0)
             # print(last_cup[0])
         return last_cup
@@ -231,6 +226,16 @@ class Kalaha:
         #  if last marble lands in an empty cup, that person takes the opposing cup too
         # need to revise steal, steals at the very end when there's just 1's moving around
         #    and should not be stealing
+
+    def get_possible_moves(self):
+        moves = []
+        for i in self.sides[self.turn]:
+            if i.marbles != 0:
+                moves.append(i.col)
+        return moves
+
+    def get_score(self):
+        return self.stores[Player.TOP].score - self.stores[Player.BOTTOM].score
 
     def __str__(self):
 
