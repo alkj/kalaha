@@ -129,6 +129,8 @@ class Kalaha(object):
             Player.TOP: Store(Player.TOP, 0),
             Player.BOTTOM: Store(Player.BOTTOM, 0)
         }
+        # self.score = {Player.TOP: self.stores[Player.TOP].score,
+        #               Player.BOTTOM: self.stores[Player.BOTTOM].score}
         self.score = {Player.TOP: 0, Player.BOTTOM: 0}
         # self.actions = self.possible_actionas()
         self.winner = Player.BLANK
@@ -141,6 +143,9 @@ class Kalaha(object):
 
     def check_game(self):
         return self.winner != Player.BLANK
+
+    def get_score(self):
+        return (self.score[Player.TOP], self.score[Player.BOTTOM])
 
     def empty_side(self):
         zerot = True
@@ -256,6 +261,7 @@ class Kalaha(object):
                 if (curr == N_COLS):  # necessary if?
                     self.stores[self.turn] = Store(
                         self.turn, self.stores[self.turn].score+1)
+                    self.score[self.turn] = self.stores[self.turn].score
                     last_cup = ("store", 0)
             # print(last_cup[0])
         return last_cup
@@ -264,3 +270,5 @@ class Kalaha(object):
         # then it's end of the game
         # in a post turn, if end marbles in store, that person goes again
         #  if last marble lands in an empty cup, that person takes the opposing cup too
+        # need to revise steal, steals at the very end when there's just 1's moving around
+        #    and should not be stealing

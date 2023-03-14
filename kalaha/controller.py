@@ -25,13 +25,16 @@ class Controller:
 
         curr = self.game.turn
         while self.game.winner == Player.BLANK:
-
+            print(f"Player {self.game.turn.name}'s turn")
             print("What cup would you like to pick up?")
             choice = int(input("> "))
             if (self.game.before_move(choice)):
                 last = self.game.move_marbles(choice)
                 Board.draw(self.game)
                 self.game.after_move(last)
+                print(
+                    f"Score: Top - {self.game.get_score()[0]},Bottom - {self.game.get_score()[1]}")
+
             else:
                 print("That is not a valid choice, try again.")
 
