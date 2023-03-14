@@ -1,6 +1,7 @@
 from kalaha.gamex import Kalaha, Player
 from kalaha.human import HumanAgent
 import kalaha.board as Board
+import kalaha.gamex as Game
 
 
 class Controller:
@@ -21,7 +22,13 @@ class Controller:
         prev_turn = Player.BLANK
         prev_actions_list = []
 
+        border = "--" * (Game.N_COLS * 2)
+
+        print("    5 4 3 2 1 0")
+        print(border)
         Board.draw(self.game)
+        print(border)
+        print("    0 1 2 3 4 5")
 
         curr = self.game.turn
         while self.game.winner == Player.BLANK:
@@ -31,6 +38,10 @@ class Controller:
             if (self.game.before_move(choice)):
                 last = self.game.move_marbles(choice)
                 Board.draw(self.game)
+                steal = self.game.steals(last)
+                if (steal):
+                    print(f"Player {self.game.turn.name} steals")
+                    Board.draw(self.game)
                 self.game.after_move(last)
                 print(
                     f"Score: Top - {self.game.get_score()[0]},Bottom - {self.game.get_score()[1]}")

@@ -176,6 +176,34 @@ class Kalaha(object):
         else:
             return (True)
 
+    def steals(self, last):
+        opp = self.turn.opponent()
+        # if the last cup a marble was placed in was empty then it takes opposing
+        if (last[0] == "turn"):  # if lands on current player's side
+            last_id = last[1]
+            last_cup = self.get_cup_by_id(self.turn, last_id)
+
+            # get the opposing players cup
+            opp_cup_id = N_COLS - last_id - 1
+            opp_cup: Cup = self.sides[opp][opp_cup_id]
+            opp_marbles = opp_cup.marbles
+
+            # if lands in empty cup and opposite cup is not empty
+            if (last_cup.marbles == 1 and opp_marbles > 0):
+                # empty the last cup
+                self.sides[self.turn][last[1]] = Cup(
+                    self.turn, last_id, 0)
+                # add the marbles to the store
+                self.stores[self.turn] = Store(
+                    self.turn, self.stores[self.turn].score+1+opp_marbles)
+                # empty the opponents cup
+                self.sides[opp][opp_cup_id] = Cup(opp, opp_cup_id, 0)
+                self.score[self.turn] = self.stores[self.turn].score
+                return True
+
+        else:
+            return False
+
     def after_move(self, last):
         # check if any side has all empty
         # if so declare the winner
@@ -190,25 +218,7 @@ class Kalaha(object):
                 self.winner = Player.BOTTOM
             else:
                 self.winner = Player.TOP
-
         opp = self.turn.opponent()
-        # if the last cup a marble was placed in was empty then it takes opposing
-        if (last[0] == "turn"):
-            last_id = last[1]
-            last_cup = self.get_cup_by_id(self.turn, last_id)
-            if (last_cup.marbles == 1):
-                opp_cup_id = N_COLS - last_id - 1
-                opp_cup: Cup = self.sides[opp][opp_cup_id]
-                opp_marbles = opp_cup.marbles
-                # empty the last cup
-                self.sides[self.turn][last[1]] = Cup(
-                    self.turn, last_id, 0)
-                # add the marbles to the store
-                self.stores[self.turn] = Store(
-                    self.turn, self.stores[self.turn].score+1+opp_marbles)
-                # empty the opponents cup
-                self.sides[opp][opp_cup_id] = Cup(opp, opp_cup_id, 0)
-
         # Switch turn
         self.turn = opp
         # if the last cup was the store then goes again
