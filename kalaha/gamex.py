@@ -3,53 +3,11 @@
 # class Store
 # class Move
 # class Kalaha
-
+import string
 from typing import Dict, List, Tuple, Optional, Union, Iterable
 from enum import Enum
 
-N_COLS = 6
-
-
-class Player(Enum):
-    BOTTOM = 0
-    TOP = 1
-    BLANK = -1
-
-    def store(self):
-        """
-        Returns the store that marbles of the given player have to reach to score a point
-        """
-        if self == Player.BOTTOM:
-            return N_COLS
-        elif self == Player.TOP:
-            return 0
-        else:
-            raise ValueError("Blank player has no goal coordinates")
-
-    def opponent(self):
-        """
-        Returns the opponent Player object
-        """
-        if self == Player.BOTTOM:
-            return Player.TOP
-        elif self == Player.TOP:
-            return Player.BOTTOM
-        else:
-            raise ValueError("Blank player has no opponents")
-
-    def is_empty(self):
-        return self == Player.BLANK
-
-    def is_player(self):
-        return self != Player.BLANK
-
-    def get_repr(self):
-        if self == Player.BOTTOM:
-            return "B"
-        elif self == Player.TOP:
-            return "T"
-        else:
-            return "NA"
+from kalaha.player import Player
 
 
 class Cup:
@@ -65,17 +23,17 @@ class Cup:
 
     def next_cup(self):
         # if bottom player side and last cup
-        if (self.col == N_COLS & self.side == Player.BOTTOM):
+        if self.col == self.cols and self.side == Player.BOTTOM:
             return Store(Player.BOTTOM)
         # if top player side and last cup
-        elif (self.col == 0 & self.side == Player.TOP):
+        elif self.col == 0 and self.side == Player.TOP:
             return Store(Player.TOP)
         # if any bottom player's cup
-        elif (self.side == Player.BOTTOM):
-            return Cup(self.side, self.col+1)
+        elif self.side == Player.BOTTOM:
+            return Cup(self.side, self.col + 1)
         # else any top player's cup
         else:
-            return Cup(self.side, self.col-1)
+            return Cup(self.side, self.col - 1)
 
     def get_marbles(self):
         return self.marbles
@@ -96,30 +54,22 @@ class Store:
     def get_score(self):
         return self.score
 
+
 # two lists of cups for a player, with pointer to next cup
 # each cup says who the player it belongs to and the number of marbles in cup
 
 
-class Move:
-    def __init__(self, player: Player, cup: Cup):
-        self.player = player
-        self.cup = cup
-        self.next_cup = Cup.next_cup(cup)
-
-    # def apply(self, game: Kalaha):
-    #     game.move_marbles(self.cup)
-
-
-class Kalaha(object):
+class Kalaha:
     """
     The game state
     """
 
-    def __init__(self):
+    def __init__(self, cols):
+        self.cols = cols
         self.turn: Player = Player.BOTTOM
         self.sides = {
-            Player.TOP: [Cup(Player.TOP, i, 4) for i in range(N_COLS)],
-            Player.BOTTOM: [Cup(Player.BOTTOM, i, 4) for i in range(N_COLS)]
+            Player.TOP: [Cup(Player.TOP, i, 4) for i in range(self.cols)],
+            Player.BOTTOM: [Cup(Player.BOTTOM, i, 4) for i in range(self.cols)]
         }
         # self.sides = {
         #     Player.TOP: [Cup(Player.TOP, 0), Cup(Player.TOP, 1)],
@@ -167,7 +117,7 @@ class Kalaha(object):
             return (Player.BOTTOM, add_scoret)
         return (Player.BLANK, 0)
 
-    def before_move(self, choice: int):
+    def is_valid(self, choice: int):
         # check that the input choice is valid, can move that cell
         if (choice < 0 or choice > 5):
             return (False)
@@ -176,7 +126,7 @@ class Kalaha(object):
         else:
             return (True)
 
-    def steals(self, last):
+    def did_steal(self, last):
         opp = self.turn.opponent()
         # if the last cup a marble was placed in was empty then it takes opposing
         if (last[0] == "turn"):  # if lands on current player's side
@@ -184,7 +134,7 @@ class Kalaha(object):
             last_cup = self.get_cup_by_id(self.turn, last_id)
 
             # get the opposing players cup
-            opp_cup_id = N_COLS - last_id - 1
+            opp_cup_id = self.cols - last_id - 1
             opp_cup: Cup = self.sides[opp][opp_cup_id]
             opp_marbles = opp_cup.marbles
 
@@ -195,7 +145,7 @@ class Kalaha(object):
                     self.turn, last_id, 0)
                 # add the marbles to the store
                 self.stores[self.turn] = Store(
-                    self.turn, self.stores[self.turn].score+1+opp_marbles)
+                    self.turn, self.stores[self.turn].score + 1 + opp_marbles)
                 # empty the opponents cup
                 self.sides[opp][opp_cup_id] = Cup(opp, opp_cup_id, 0)
                 self.score[self.turn] = self.stores[self.turn].score
@@ -211,7 +161,7 @@ class Kalaha(object):
         if (empty_side[0] != Player.BLANK):
             if (empty_side[0] == Player.TOP):
                 self.score[Player.BOTTOM] = self.score[Player.BOTTOM] + \
-                    empty_side[1]
+                                            empty_side[1]
             if (empty_side[0] == Player.BOTTOM):
                 self.score[Player.TOP] = self.score[Player.TOP] + empty_side[1]
             if (self.score[Player.BOTTOM] > self.score[Player.TOP]):
@@ -226,7 +176,7 @@ class Kalaha(object):
             self.turn = self.turn.opponent()
             print("Last marble landed in your store. Go again!")
 
-    def move_marbles(self, cup_id: int):
+    def move_marbles(self, cup_id: int) -> (string, int):
         # moves the marbles from cup_id and returns the last cup a marble is dropped
         # returns the tuple specifying what side/store it lands on, the cup number on that side
 
@@ -238,39 +188,38 @@ class Kalaha(object):
         num_marbles = start_cup.get_marbles()
         self.sides[self.turn][cup_id] = Cup(self.turn, cup_id, 0)
 
-
-# more general turn
+        # more general turn
         opp = self.turn.opponent()
         opp_count = 0
-        curr = cup_id+1
+        curr = cup_id + 1
         last_cup = ("turn", curr)
-        for i in range(cup_id+1, cup_id+num_marbles+1):
+        for i in range(cup_id + 1, cup_id + num_marbles + 1):
             # print(str(curr) + " opp: " + str(opp_count))
-            if (curr < N_COLS | (i >= N_COLS & opp_count >= N_COLS)):
+            if curr < self.cols or (i >= self.cols & opp_count >= self.cols):
                 # if curr is greater than or equal to 6 and opp_count is greater than 6 too
                 # means it already went around both sides and is back to self.turn's row
                 # so set it back to first cup of turn and also opp to 0 in case it goes
                 # back to the opposing turn's side
-                if (curr >= N_COLS):
+                if (curr >= self.cols):
                     curr = 0
                     opp_count = 0
                 self.sides[self.turn][curr] = Cup(
-                    self.turn, curr, self.sides[self.turn][curr].get_marbles()+1)
+                    self.turn, curr, self.sides[self.turn][curr].get_marbles() + 1)
                 last_cup = ("turn", curr)
                 curr += 1
-            elif (i > N_COLS):  # else it goes into top players side
-                if (opp_count < N_COLS):
+            elif (i > self.cols):  # else it goes into top players side
+                if (opp_count < self.cols):
                     self.sides[opp][opp_count] = Cup(
-                        opp, opp_count, self.sides[opp][opp_count].get_marbles()+1)
+                        opp, opp_count, self.sides[opp][opp_count].get_marbles() + 1)
                     last_cup = ("opp", opp_count)
                     opp_count += 1
                 else:  # go back to start of turn's row, not sure needed here anymore
                     # taken care of in first if
                     opp_count = 0
             else:  # else the cup col number is equal to the store
-                if (curr == N_COLS):  # necessary if?
+                if (curr == self.cols):  # necessary if?
                     self.stores[self.turn] = Store(
-                        self.turn, self.stores[self.turn].score+1)
+                        self.turn, self.stores[self.turn].score + 1)
                     self.score[self.turn] = self.stores[self.turn].score
                     last_cup = ("store", 0)
             # print(last_cup[0])
@@ -282,3 +231,27 @@ class Kalaha(object):
         #  if last marble lands in an empty cup, that person takes the opposing cup too
         # need to revise steal, steals at the very end when there's just 1's moving around
         #    and should not be stealing
+
+    def __str__(self):
+
+        border = "--" * (self.cols * 2)
+        row_separator = "  " + "--" * self.cols
+
+        returned_string = "    5 4 3 2 1 0\n"
+        returned_string = returned_string + border + "\n"
+
+        top = "    "
+        for cupt in reversed(self.sides[Player.TOP]):
+            top += str(cupt.marbles) + " "
+        returned_string = returned_string + top + "\n"
+        stores = str(self.stores[Player.TOP].score) + \
+                 row_separator + " " + str(self.stores[Player.BOTTOM].score)
+        returned_string = returned_string + stores + "\n"
+        bottom = "    "
+        for cupb in self.sides[Player.BOTTOM]:
+            bottom += str(cupb.marbles) + " "
+        returned_string = returned_string + bottom + "\n"
+
+        returned_string = returned_string + border + "\n"
+        returned_string = returned_string + "    0 1 2 3 4 5\n"
+        return returned_string + "\n"
