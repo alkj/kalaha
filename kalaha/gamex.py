@@ -7,6 +7,9 @@ import string
 from typing import Dict, List, Tuple, Optional, Union, Iterable
 from enum import Enum
 
+from kalaha.agent import Agent
+from kalaha.human_agent import HumanAgent
+from kalaha.minimax_agent import MinimaxAgent
 from kalaha.player import Player
 
 
@@ -33,6 +36,11 @@ class Kalaha:
     def __init__(self, cols):
         self.cols = cols
         self.current_player: Player = Player.BOTTOM
+
+        self.player_bottom: Agent = HumanAgent()
+        self.player_top: Agent = MinimaxAgent()
+        self.agents = {Player.BOTTOM: self.player_bottom, Player.TOP: self.player_top}
+
         self.sides = {
             Player.TOP: [Cup(Player.TOP, i, 4) for i in range(self.cols)],
             Player.BOTTOM: [Cup(Player.BOTTOM, i, 4) for i in range(self.cols)]
@@ -104,9 +112,9 @@ class Kalaha:
         # if the last cup was the store then goes again
         if last[0] == "store":
             self.current_player = self.current_player.opponent()
-            print("Last marble landed in your store. Go again!")
+            # print("Last marble landed in your store. Go again!")
 
-    def move_marbles(self, cup_id: int) :
+    def move_marbles(self, cup_id: int):
         # moves the marbles from cup_id and returns the last cup a marble is dropped
         # returns the tuple specifying what side/store it lands on, the cup number on that side
 
