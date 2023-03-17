@@ -6,17 +6,6 @@ class Player(Enum):
     TOP = 1
     BLANK = -1
 
-    def store(self):
-        """
-        Returns the store that marbles of the given player have to reach to score a point
-        """
-        if self == Player.BOTTOM:
-            return N_COLS
-        elif self == Player.TOP:
-            return 0
-        else:
-            raise ValueError("Blank player has no goal coordinates")
-
     def opponent(self):
         """
         Returns the opponent Player object

@@ -8,7 +8,7 @@ class HumanAgent(Agent):
     """
 
     def choose(self, game: Kalaha) -> int:
-        print(f"Player {game.turn.name}'s turn")
+        print(f"Player {game.current_player.name}'s turn")
         print("What cup would you like to pick up?")
         return int(input("> "))
 

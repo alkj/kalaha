@@ -29,14 +29,8 @@ class Controller:
         while self.game.winner == Player.BLANK:
             choice = self.current_player.choose(self.game)
             if self.game.is_valid(choice):
-                last = self.game.move_marbles(choice)
+                self.game.move_marbles(choice)
                 print(self.game.__str__())
-                if self.game.did_steal(last):
-                    print(f"Player {self.game.turn.name} steals")
-                    print(self.game.__str__())
-                self.game.after_move(last)
-                print(f"Score: Top - {self.game.stores()[0]},Bottom - {self.game.stores()[1]}")
-
             else:
                 print("That is not a valid choice, try again.")
 
