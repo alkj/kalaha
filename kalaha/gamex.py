@@ -96,6 +96,18 @@ class Kalaha:
         else:
             return False
 
+    def declare_winner(self):
+        # Rules are updated to conform with
+        # https://mancala.fandom.com/wiki/Kalah
+        player_top_marbles = sum(map(lambda c: c.marbles, self.sides[Player.TOP]))
+        player_bottom_marbles = sum(map(lambda c: c.marbles, self.sides[Player.BOTTOM]))
+        if player_top_marbles == 0 and player_bottom_marbles == 0:
+            self.winner = Player.TOP \
+                if self.stores[Player.TOP].marbles > self.stores[Player.BOTTOM].marbles \
+                else Player.BOTTOM
+            if self.stores[Player.TOP].marbles == self.stores[Player.BOTTOM].marbles:
+                self.winner = None  # its a draw !
+
     def after_move(self, last):
         # check if any side has all empty
         # if so declare the winner
@@ -103,10 +115,14 @@ class Kalaha:
         player_bottom_marbles = sum(map(lambda c: c.marbles, self.sides[Player.BOTTOM]))
         if player_top_marbles == 0:
             self.stores[Player.TOP].marbles = self.stores[Player.TOP].marbles + player_bottom_marbles
-            self.winner = Player.TOP
+            for c in self.sides[Player.BOTTOM]:
+                c.marbles = 0
+            self.declare_winner()
         if player_bottom_marbles == 0:
             self.stores[Player.BOTTOM].marbles = self.stores[Player.BOTTOM].marbles + player_top_marbles
-            self.winner = Player.BOTTOM
+            for c in self.sides[Player.TOP]:
+                c.marbles = 0
+            self.declare_winner()
 
         self.current_player = self.current_player.opponent()
 
