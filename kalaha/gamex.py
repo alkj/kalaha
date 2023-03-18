@@ -33,8 +33,9 @@ class Kalaha:
     The game state
     """
 
-    def __init__(self, cols):
+    def __init__(self, cols,agents):
         self.cols = cols
+        self.agents = agents
         self.current_player: Player = Player.BOTTOM
 
         self.player_bottom: Agent = MinimaxAgent()

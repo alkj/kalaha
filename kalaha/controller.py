@@ -1,14 +1,17 @@
 from kalaha.gamex import Kalaha, Player
 
-
 class Controller:
     """
     The controller requests moves to the agents (whetever their are human or AI) and applies it to the game
     """
+    #
+    # def __init__(self, cols):
+    #     self.cols = cols
+    #     self.game = Kalaha(self.cols)
 
-    def __init__(self, cols):
+    def __init__(self, cols, agents):
         self.cols = cols
-        self.game = Kalaha(self.cols)
+        self.game = Kalaha(self.cols, agents)
 
     def play(self) -> Player:
         """
@@ -21,6 +24,8 @@ class Controller:
 
         while self.game.winner == Player.BLANK:
             choice = self.game.agents[self.game.current_player].choose(self.game)
+            #choice = self.game.agents[self.game.current_player.value].choose(self.game)
+
             if self.game.is_valid(choice):
                 self.game.move_marbles(choice)
                 print(self.game.__str__())

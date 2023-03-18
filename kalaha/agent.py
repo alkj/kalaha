@@ -1,7 +1,8 @@
-from abc import abstractmethod
+from abc import ABC, abstractmethod
 
 
-class Agent:
+
+class Agent(ABC):
     @abstractmethod
     def choose(self, game) -> int:
         pass
@@ -9,3 +10,4 @@ class Agent:
     @abstractmethod
     def __str__(self):
         pass
+
