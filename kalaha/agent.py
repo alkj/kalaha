@@ -1,11 +1,10 @@
 from abc import abstractmethod
 
-from kalaha.gamex import Kalaha
 
 
 class Agent:
     @abstractmethod
-    def choose(self, game: Kalaha) -> int:
+    def choose(self, game) -> int:
         pass
 
     @abstractmethod
