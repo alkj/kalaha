@@ -37,7 +37,7 @@ class Kalaha:
         self.cols = cols
         self.current_player: Player = Player.BOTTOM
 
-        self.player_bottom: Agent = HumanAgent()
+        self.player_bottom: Agent = MinimaxAgent()
         self.player_top: Agent = MinimaxAgent()
         self.agents = {Player.BOTTOM: self.player_bottom, Player.TOP: self.player_top}
 
