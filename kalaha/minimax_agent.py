@@ -7,15 +7,16 @@ from kalaha.player import Player
 class MinimaxAgent(Agent):
 
     def __init__(self):
-        self.max_depth = 2
+        self.max_depth = 4
+
     """
     An human agent providing a CLI to choose the moves
     """
 
     def choose(self, input_game) -> int:
-        minimax = self.minimax(copy.deepcopy(input_game), 0)
-        print(self.__str__(), "player chooses:", minimax)
-        return minimax
+        choice = self.minimax(copy.deepcopy(input_game), 0)
+        print(self.__str__(), "chooses:", choice, "for", input_game.current_player)
+        return choice
 
     def minimax(self, input_game, depth: int) -> int:
 
@@ -27,40 +28,40 @@ class MinimaxAgent(Agent):
         if game.current_player == Player.TOP:
             maximum_score = -48
             for i in game.get_possible_moves():
+                # print("checking move ", i)
                 game_copy = copy.deepcopy(game)
                 game_copy.move_marbles(i)
-
-                # if the player after the move is the top player again, then the scored should be maximized
+                # if the player after the move is the top player again, then the score should be maximized
                 if game_copy.current_player == Player.TOP:
                     score = self.maximize(game_copy, depth + 1)
                     if score > maximum_score:
                         maximum_score = score
                         best_move = i
 
-                elif game_copy.current_player == Player.BOTTOM:
+                else:
                     score = self.minimize(game_copy, depth + 1)
                     if score > maximum_score:
                         maximum_score = score
                         best_move = i
+            #  print("maximum score:", maximum_score)
 
-        elif game.current_player == Player.BOTTOM:
+        else:  # bottom player
             minimum_score = 48
             for i in game.get_possible_moves():
+                # print("checking move ", i)
                 game_copy = copy.deepcopy(game)
                 game_copy.move_marbles(i)
-
                 if game_copy.current_player == Player.TOP:
                     score = self.maximize(game_copy, depth + 1)
                     if score < minimum_score:
                         minimum_score = score
                         best_move = i
-
-                if game_copy.current_player == Player.BOTTOM:
+                else:
                     score = self.minimize(game_copy, depth + 1)
                     if score < minimum_score:
                         minimum_score = score
                         best_move = i
-
+            #  print("minimum score:", minimum_score)
         return best_move
 
     def minimize(self, input_game, depth: int) -> int:
@@ -75,10 +76,10 @@ class MinimaxAgent(Agent):
         for i in game.get_possible_moves():
             game_copy = copy.deepcopy(game)
             game_copy.move_marbles(i)
-            if game.current_player == Player.TOP:
-                score = self.minimize(game_copy, depth + 1)
-            else:
+            if game_copy.current_player == Player.TOP:
                 score = self.maximize(game_copy, depth + 1)
+            else:
+                score = self.minimize(game_copy, depth + 1)
             if score < minimum_score:
                 minimum_score = score
         return minimum_score
@@ -95,10 +96,10 @@ class MinimaxAgent(Agent):
         for i in game.get_possible_moves():
             game_copy = copy.deepcopy(game)
             game_copy.move_marbles(i)
-            if game.current_player == Player.TOP:
-                score = self.minimize(game_copy, depth + 1)
-            else:
+            if game_copy.current_player == Player.TOP:
                 score = self.maximize(game_copy, depth + 1)
+            else:
+                score = self.minimize(game_copy, depth + 1)
             if score > maximum_score:
                 maximum_score = score
         return maximum_score
