@@ -16,5 +16,5 @@ if __name__ == '__main__':
     #agent_top: Agent = agent_classes[int(input("enter top agent"))]()  # instantiate object from selected class
     #agent_bottom: Agent = agent_classes[int(input("enter bottom player"))]()
 
-    controller = Controller(N_COLS, agent_classes[1](), agent_classes[3]())
+    controller = Controller(N_COLS, agent_classes[1](), agent_classes[2]())
     controller.play()
