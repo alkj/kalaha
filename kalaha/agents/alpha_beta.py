@@ -1,17 +1,18 @@
 import copy
 
-from kalaha.agent import Agent
+from kalaha.agents.agent import Agent
 from kalaha.player import Player
+
 
 class AlphaBetaMinimaxAgent(Agent):
     def __init__(self):
-        self.max_depth = None
+        self.max_depth = 6
 
     def choose(self, input_game) -> int:
         alpha = -float('inf')
         beta = float('inf')
         minimax = self.alphabeta(input_game, 0, alpha, beta)
-        print(self.__str__(), "player chooses:", minimax)
+        print(self, "chooses:", minimax, "for", input_game.current_player)
         return minimax
 
     def alphabeta(self, input_game, depth: int, alpha: float, beta: float) -> int:

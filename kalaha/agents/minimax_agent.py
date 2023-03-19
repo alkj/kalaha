@@ -1,13 +1,13 @@
 import copy
 
-from kalaha.agent import Agent
+from kalaha.agents.agent import Agent
 from kalaha.player import Player
 
 
 class MinimaxAgent(Agent):
 
     def __init__(self):
-        self.max_depth = 4
+        self.max_depth = 6
 
     """
     An human agent providing a CLI to choose the moves
@@ -15,7 +15,7 @@ class MinimaxAgent(Agent):
 
     def choose(self, input_game) -> int:
         choice = self.minimax(copy.deepcopy(input_game), 0)
-        print(self.__str__(), "chooses:", choice, "for", input_game.current_player)
+        print(self, "chooses:", choice, "for", input_game.current_player)
         return choice
 
     def minimax(self, input_game, depth: int) -> int:
@@ -34,13 +34,13 @@ class MinimaxAgent(Agent):
                 # if the player after the move is the top player again, then the score should be maximized
                 if game_copy.current_player == Player.TOP:
                     score = self.maximize(game_copy, depth + 1)
-                    if score > maximum_score:
+                    if score >= maximum_score:
                         maximum_score = score
                         best_move = i
 
                 else:
                     score = self.minimize(game_copy, depth + 1)
-                    if score > maximum_score:
+                    if score >= maximum_score:
                         maximum_score = score
                         best_move = i
             #  print("maximum score:", maximum_score)
@@ -53,12 +53,12 @@ class MinimaxAgent(Agent):
                 game_copy.move_marbles(i)
                 if game_copy.current_player == Player.TOP:
                     score = self.maximize(game_copy, depth + 1)
-                    if score < minimum_score:
+                    if score <= minimum_score:
                         minimum_score = score
                         best_move = i
                 else:
                     score = self.minimize(game_copy, depth + 1)
-                    if score < minimum_score:
+                    if score <= minimum_score:
                         minimum_score = score
                         best_move = i
             #  print("minimum score:", minimum_score)
@@ -80,7 +80,7 @@ class MinimaxAgent(Agent):
                 score = self.maximize(game_copy, depth + 1)
             else:
                 score = self.minimize(game_copy, depth + 1)
-            if score < minimum_score:
+            if score <= minimum_score:
                 minimum_score = score
         return minimum_score
 

@@ -3,13 +3,10 @@
 # class Store
 # class Move
 # class Kalaha
-import string
-from typing import Dict, List, Tuple, Optional, Union, Iterable
-from enum import Enum
+from typing import List
 
-from kalaha.agent import Agent
-from kalaha.human_agent import HumanAgent
-from kalaha.minimax_agent import MinimaxAgent
+from kalaha.agents.agent import Agent
+from kalaha.agents.minimax_agent import MinimaxAgent
 from kalaha.player import Player
 
 
@@ -33,14 +30,13 @@ class Kalaha:
     The game state
     """
 
-    def __init__(self, cols,agents):
+    def __init__(self, cols, agent_top=MinimaxAgent(), agent_bottom=MinimaxAgent()):
         self.cols = cols
-        self.agents = agents
         self.current_player: Player = Player.BOTTOM
 
-        self.player_bottom: Agent = MinimaxAgent()
-        self.player_top: Agent = MinimaxAgent()
-        self.agents = {Player.BOTTOM: self.player_bottom, Player.TOP: self.player_top}
+        self.agent_top: Agent = agent_top
+        self.agent_bottom: Agent = agent_bottom
+        self.agents = {Player.BOTTOM: self.agent_bottom, Player.TOP: self.agent_top}
 
         self.sides = {
             Player.TOP: [Cup(Player.TOP, i, 4) for i in range(self.cols)],

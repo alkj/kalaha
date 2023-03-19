@@ -1,4 +1,4 @@
-from kalaha.agent import Agent
+from kalaha.agents.agent import Agent
 
 
 class HumanAgent(Agent):
