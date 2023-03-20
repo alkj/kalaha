@@ -1,5 +1,6 @@
 import copy
 import math
+import multiprocessing
 import random
 
 from kalaha.agents.agent import Agent
@@ -48,31 +49,38 @@ class Node:
     def highest_value_choice(self):
         best_index = -1
         highest_score = -48
-        for i, c in self.children:
+        for i, c in self.children.items():
             if c.value() > highest_score:
                 highest_score = c.value()
                 best_index = i
         return best_index
 
 
+def print_tree(node, indent=0):
+    print(' ' * indent + str(node.value()))
+    for child in node.children.values():
+        print_tree(child, indent + 2)
+
+
 def simulate_times(game, param) -> float:
-    simulations = list(map(lambda n: simulate(game), [0] * param))
+    pool = multiprocessing.Pool()
+    simulations = pool.map(simulate, [game] * param)
+    pool.close()
+    pool.join()
     return sum(simulations)
 
 
 def simulate(input_game):
-    if input_game.winner == Player.TOP:
-        return 1.0
-    if input_game.winner == Player.BOTTOM:
-        return 0.0
-    if input_game.winner is None:  # it's a draw
-        return 0.5
-    if len(input_game.get_possible_moves()) == 0:
-        print("empty")
-    random_choice = random.choice(input_game.get_possible_moves())
     game_copy = copy.deepcopy(input_game)
-    game_copy.move_marbles(random_choice)
-    return simulate(game_copy)
+    while True:
+        if game_copy.winner == Player.TOP:
+            return 1.0
+        if game_copy.winner == Player.BOTTOM:
+            return 0.0
+        if game_copy.winner is None:  # it's a draw
+            return 0.5
+        random_choice = random.choice(game_copy.get_possible_moves())
+        game_copy.move_marbles(random_choice)
 
 
 def make_move(game, move):
@@ -97,14 +105,16 @@ class MCTSAgent2(Agent):
     """
 
     def choose(self, input_game) -> int:
-        choice = self.mcts(input_game).highest_value_choice()
+        root = self.mcts(input_game)
+        #  print_tree(root)
+        choice = root.highest_value_choice()
         print(self, "chooses:", choice, "for", input_game.current_player)
         return choice
 
-    def mcts(self, input_game, sampling=10, simulations=10) -> Node:
+    def mcts(self, input_game, sampling=50, simulations=30) -> Node:
 
         self.root = Node(0, copy.deepcopy(input_game))
-        moves = self.root.game.get_possible_moves()  # list of moves
+        moves = self.root.game.get_possible_moves()
 
         # Expansion
         for m in moves:
@@ -120,16 +130,16 @@ class MCTSAgent2(Agent):
             self.root.value_sum += self.root.children[child].value_sum
             self.root.visit_count += self.root.children[child].visit_count
 
-        print(self.root.value())
-        for child in self.root.children:
-            print(self.root.children[child].value(), end=" : ")
-
         path = [self.root]
 
         for i in range(simulations):  # number of simulations
+            # print("sim", i)
             node = self.root
+            # print(self.root.value())
             while node.is_expanded():
-                move, child = self.root.select_child()
+                # print(node.value())
+                # print([v.value() for (k, v) in node.children.items()])
+                _, child = node.select_child()
                 path.append(child)
                 node = child
 
@@ -155,20 +165,20 @@ class MCTSAgent2(Agent):
                     node.value_sum += node.children[child].value_sum
                     node.visit_count += node.children[child].visit_count
 
-                self.backpropagate(path, node.value())
+                self.backpropagate(path, node.value(), sampling)
             else:
                 # the game is over. either a win or a draw.
                 win = 0
                 if node.game.winner == Player.TOP:
                     win = 1
-                self.backpropagate(path, win)
+                self.backpropagate(path, win, sampling)
 
         return self.root
 
-    def backpropagate(self, path, win):
+    def backpropagate(self, path, win, samplings):
         for node in reversed(path):
             node.value_sum += win
-            node.visit_count += 1
+            node.visit_count += samplings
 
     def simulate(self, input_game) -> int:
         if input_game.winner == Player.TOP:
@@ -182,3 +192,6 @@ class MCTSAgent2(Agent):
 
     def __str__(self):
         return "MCTS Agent 2"
+
+    def __deepcopy__(self, memo):
+        return self
