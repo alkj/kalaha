@@ -5,6 +5,10 @@ from kalaha.player import Player
 
 
 class MinimaxAgent(Agent):
+    """
+    author: Alexander(s165477)
+
+    """
 
     def __init__(self):
         self.max_depth = 6

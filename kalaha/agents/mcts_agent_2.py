@@ -70,6 +70,7 @@ def make_move(game, move):
 
 class MCTSAgent2(Agent):
     """
+    author: Alexander(s165477)
     MCTS Based on :
     SELECTION
     EXPANSION
