@@ -62,7 +62,6 @@ def print_tree(node, indent=0):
         print_tree(child, indent + 2)
 
 
-
 def make_move(game, move):
     deepcopy = copy.deepcopy(game)
     deepcopy.move_marbles(move)
@@ -70,20 +69,19 @@ def make_move(game, move):
 
 
 class MCTSAgent2(Agent):
+    """
+    MCTS Based on :
+    SELECTION
+    EXPANSION
+    SIMULATION
+    UPDATE
+
+    """
 
     def __init__(self):
         self.root = None
         self.max_depth = 2
         self.player = Player.BLANK
-
-    """
-    SELECTION
-    EXPANSION
-    SIMULATION
-    UPDATE
-    
-    
-    """
 
     def simulate_times(self, game, param) -> float:
         pool = multiprocessing.Pool()

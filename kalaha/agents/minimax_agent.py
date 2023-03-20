@@ -10,7 +10,7 @@ class MinimaxAgent(Agent):
         self.max_depth = 6
 
     """
-    An human agent providing a CLI to choose the moves
+    An minimax agent 
     """
 
     def choose(self, input_game) -> int:
