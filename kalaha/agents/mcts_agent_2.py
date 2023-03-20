@@ -12,7 +12,7 @@ class Node:
         self.prior = prior
         self.game = game
         self.children = {}
-        self.visit_count = 0
+        self.visit_count = 1
         self.value_sum = 0
         self.state = None
 
@@ -62,26 +62,6 @@ def print_tree(node, indent=0):
         print_tree(child, indent + 2)
 
 
-def simulate_times(game, param) -> float:
-    pool = multiprocessing.Pool()
-    simulations = pool.map(simulate, [game] * param)
-    pool.close()
-    pool.join()
-    return sum(simulations)
-
-
-def simulate(input_game):
-    game_copy = copy.deepcopy(input_game)
-    while True:
-        if game_copy.winner == Player.TOP:
-            return 1.0
-        if game_copy.winner == Player.BOTTOM:
-            return 0.0
-        if game_copy.winner is None:  # it's a draw
-            return 0.5
-        random_choice = random.choice(game_copy.get_possible_moves())
-        game_copy.move_marbles(random_choice)
-
 
 def make_move(game, move):
     deepcopy = copy.deepcopy(game)
@@ -94,6 +74,7 @@ class MCTSAgent2(Agent):
     def __init__(self):
         self.root = None
         self.max_depth = 2
+        self.player = Player.BLANK
 
     """
     SELECTION
@@ -104,6 +85,25 @@ class MCTSAgent2(Agent):
     
     """
 
+    def simulate_times(self, game, param) -> float:
+        pool = multiprocessing.Pool()
+        simulations = pool.map(self.simulate, [game] * param)
+        pool.close()
+        pool.join()
+        return sum(simulations)
+
+    def simulate(self, input_game) -> float:
+        game_copy = copy.deepcopy(input_game)
+        while True:
+            if game_copy.winner == self.player:
+                return 1.0
+            if game_copy.winner == self.player.opponent():
+                return 0.0
+            if game_copy.winner is None:  # it's a draw
+                return 0.5
+            random_choice = random.choice(game_copy.get_possible_moves())
+            game_copy.move_marbles(random_choice)
+
     def choose(self, input_game) -> int:
         root = self.mcts(input_game)
         #  print_tree(root)
@@ -112,17 +112,18 @@ class MCTSAgent2(Agent):
         return choice
 
     def mcts(self, input_game, sampling=50, simulations=30) -> Node:
+        self.player = input_game.current_player
 
-        self.root = Node(0, copy.deepcopy(input_game))
+        self.root = Node(math.e, copy.deepcopy(input_game))
         moves = self.root.game.get_possible_moves()
 
         # Expansion
         for m in moves:
-            self.root.children[m] = Node(0, make_move(self.root.game, m))
+            self.root.children[m] = Node(math.e, make_move(self.root.game, m))
 
         # Simulation
         for child in self.root.children:
-            self.root.children[child].value_sum += simulate_times(self.root.children[child].game, sampling)
+            self.root.children[child].value_sum += self.simulate_times(self.root.children[child].game, sampling)
             self.root.children[child].visit_count += sampling
 
         # Update
@@ -145,9 +146,6 @@ class MCTSAgent2(Agent):
 
             parent = path[-2]
 
-            # is game finished ?
-            # who is playing ?
-            # can it be expanded ?
             if node.game.winner == Player.BLANK:
                 moves = node.game.get_possible_moves()  # list of moves
 
@@ -157,7 +155,7 @@ class MCTSAgent2(Agent):
 
                 # Simulation
                 for child in node.children:
-                    node.children[child].value_sum += simulate_times(node.children[child].game, sampling)
+                    node.children[child].value_sum += self.simulate_times(node.children[child].game, sampling)
                     node.children[child].visit_count += sampling
 
                 # Update
@@ -169,7 +167,7 @@ class MCTSAgent2(Agent):
             else:
                 # the game is over. either a win or a draw.
                 win = 0
-                if node.game.winner == Player.TOP:
+                if node.game.winner == self.player:
                     win = 1
                 self.backpropagate(path, win, sampling)
 
@@ -177,18 +175,11 @@ class MCTSAgent2(Agent):
 
     def backpropagate(self, path, win, samplings):
         for node in reversed(path):
-            node.value_sum += win
+            if node.game.current_player != self.player:
+                node.value_sum += win * -1
+            else:
+                node.value_sum += win
             node.visit_count += samplings
-
-    def simulate(self, input_game) -> int:
-        if input_game.winner == Player.TOP:
-            return 1
-        if input_game.winner == Player.BOTTOM:
-            return 0
-        random_choice = random.choice(input_game.get_possible_moves())
-        game_copy = copy.deepcopy(input_game)
-        game_copy.move_marbles(random_choice)
-        return self.simulate(game_copy)
 
     def __str__(self):
         return "MCTS Agent 2"
