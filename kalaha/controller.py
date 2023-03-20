@@ -33,4 +33,7 @@ class Controller:
             else:
                 print("That is not a valid choice, try again.")
 
-        print(f"Player {self.game.winner.name} Won!")
+        if self.game.winner is None:
+            print("It's a draw !")
+        else:
+            print(f"Player {self.game.winner.name} Won!")
